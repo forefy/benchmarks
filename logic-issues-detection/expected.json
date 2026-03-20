@@ -1,0 +1,152 @@
+[
+  {
+    "id": "case-001",
+    "source_repo": "https://github.com/Uniswap/v2-core",
+    "source_note": "Inspired by flash loan price oracle manipulation pattern documented in multiple audits of Uniswap V2 forks. Attacker inflates spot price within a single transaction to manipulate a TWAP-less oracle.",
+    "input": {
+      "contract": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.0;\n\ninterface IERC20 { function balanceOf(address) external view returns (uint256); }\n\ncontract SpotPriceOracle {\n    address public token;\n    address public weth;\n\n    constructor(address _token, address _weth) {\n        token = _token;\n        weth = _weth;\n    }\n\n    function getPrice() public view returns (uint256) {\n        uint256 tokenBal = IERC20(token).balanceOf(address(this));\n        uint256 wethBal = IERC20(weth).balanceOf(address(this));\n        require(tokenBal > 0, 'no liquidity');\n        return wethBal * 1e18 / tokenBal;\n    }\n\n    function borrow(uint256 amount) external {\n        uint256 price = getPrice();\n        uint256 collateralRequired = amount * price / 1e18;\n        // transfer collateral check omitted for brevity\n        require(collateralRequired > 0, 'bad price');\n    }\n}"
+    },
+    "expected_output": {
+      "case_id": "case-001",
+      "vulnerable": true,
+      "vulnerability_type": "price_manipulation",
+      "affected_function": "getPrice",
+      "explanation": "getPrice uses instantaneous spot balances as the price oracle, making it trivially manipulable via a flash loan within the same transaction."
+    }
+  },
+  {
+    "id": "case-002",
+    "source_repo": "https://github.com/compound-finance/compound-protocol",
+    "source_note": "Models the integer rounding direction bug class found in several Compound forks. When dividing before multiplying, dust amounts allow borrowing without proportional interest accrual.",
+    "input": {
+      "contract": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.0;\n\ncontract LendingPool {\n    uint256 public totalBorrows;\n    uint256 public borrowIndex = 1e18;\n\n    mapping(address => uint256) public borrowShares;\n\n    function borrow(uint256 amount) external {\n        uint256 shares = amount / borrowIndex;\n        borrowShares[msg.sender] += shares;\n        totalBorrows += amount;\n    }\n\n    function repay(address borrower) external payable {\n        uint256 owed = borrowShares[borrower] * borrowIndex;\n        require(msg.value >= owed, 'insufficient');\n        delete borrowShares[borrower];\n        totalBorrows -= owed;\n    }\n}"
+    },
+    "expected_output": {
+      "case_id": "case-002",
+      "vulnerable": true,
+      "vulnerability_type": "incorrect_accounting",
+      "affected_function": "borrow",
+      "explanation": "Integer division truncates shares to zero for amounts smaller than borrowIndex, allowing a borrower to receive tokens without being assigned any repayment obligation."
+    }
+  },
+  {
+    "id": "case-003",
+    "source_repo": "https://github.com/OpenZeppelin/openzeppelin-contracts/issues/2020",
+    "source_note": "Models the incorrect state update order leading to reentrancy, based on documented findings in ERC-777 and callback-enabled token protocols.",
+    "input": {
+      "contract": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.0;\n\ninterface IToken {\n    function transfer(address to, uint256 amount) external returns (bool);\n}\n\ncontract Vault {\n    mapping(address => uint256) public balances;\n    IToken public token;\n\n    constructor(address _token) { token = _token; }\n\n    function deposit(uint256 amount) external {\n        balances[msg.sender] += amount;\n    }\n\n    function withdraw(uint256 amount) external {\n        require(balances[msg.sender] >= amount, 'insufficient');\n        token.transfer(msg.sender, amount);\n        balances[msg.sender] -= amount;\n    }\n}"
+    },
+    "expected_output": {
+      "case_id": "case-003",
+      "vulnerable": true,
+      "vulnerability_type": "checks_effects_interactions_violation",
+      "affected_function": "withdraw",
+      "explanation": "The balance is decremented after the external token.transfer call, allowing a reentrant caller to drain the vault before the state update is applied."
+    }
+  },
+  {
+    "id": "case-004",
+    "source_repo": "https://github.com/Uniswap/v3-core/blob/main/audits",
+    "source_note": "Models the missing access control on a privileged function, a common finding across DeFi protocol audits documented in Sherlock and Code4rena reports.",
+    "input": {
+      "contract": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.0;\n\ncontract FeeCollector {\n    address public treasury;\n    uint256 public feeBps = 30;\n\n    constructor(address _treasury) {\n        treasury = _treasury;\n    }\n\n    function setFeeBps(uint256 newFee) external {\n        require(newFee <= 1000, 'fee too high');\n        feeBps = newFee;\n    }\n\n    function setTreasury(address newTreasury) external {\n        treasury = newTreasury;\n    }\n\n    function collectFee(uint256 amount) external returns (uint256 fee) {\n        fee = amount * feeBps / 10000;\n    }\n}"
+    },
+    "expected_output": {
+      "case_id": "case-004",
+      "vulnerable": true,
+      "vulnerability_type": "missing_access_control",
+      "affected_function": "setTreasury",
+      "explanation": "setTreasury has no owner or access control check, allowing any caller to redirect fee collection to an arbitrary address."
+    }
+  },
+  {
+    "id": "case-005",
+    "source_repo": "https://github.com/maple-finance/maple-core/tree/main/audits",
+    "source_note": "Models the token inflation via share accounting discrepancy documented in ERC-4626 vault audit findings. First depositor can manipulate the share price.",
+    "input": {
+      "contract": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.0;\n\ninterface IERC20 {\n    function transferFrom(address, address, uint256) external returns (bool);\n    function transfer(address, uint256) external returns (bool);\n    function balanceOf(address) external view returns (uint256);\n}\n\ncontract SimpleVault {\n    IERC20 public asset;\n    uint256 public totalShares;\n\n    constructor(address _asset) { asset = _asset; }\n\n    function deposit(uint256 assets) external returns (uint256 shares) {\n        uint256 supply = totalShares;\n        uint256 totalAssets = asset.balanceOf(address(this));\n        shares = supply == 0 ? assets : assets * supply / totalAssets;\n        totalShares += shares;\n        asset.transferFrom(msg.sender, address(this), assets);\n    }\n\n    function redeem(uint256 shares) external returns (uint256 assets) {\n        assets = shares * asset.balanceOf(address(this)) / totalShares;\n        totalShares -= shares;\n        asset.transfer(msg.sender, assets);\n    }\n}"
+    },
+    "expected_output": {
+      "case_id": "case-005",
+      "vulnerable": true,
+      "vulnerability_type": "share_price_manipulation",
+      "affected_function": "deposit",
+      "explanation": "The first depositor receives shares equal to assets deposited; they can then donate tokens directly to the vault to inflate the share price, causing subsequent depositors to receive zero shares for small deposits."
+    }
+  },
+  {
+    "id": "case-006",
+    "source_repo": "https://github.com/aave/aave-v2-core",
+    "source_note": "Models a well-formed lending contract with no logic vulnerabilities, included as a non-vulnerable control case to test for false positives.",
+    "input": {
+      "contract": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.0;\n\nimport '@openzeppelin/contracts/access/Ownable.sol';\n\ncontract StableLending is Ownable {\n    mapping(address => uint256) public collateral;\n    mapping(address => uint256) public debt;\n    uint256 public constant COLLATERAL_FACTOR = 150;\n\n    function depositCollateral(uint256 amount) external {\n        collateral[msg.sender] += amount;\n    }\n\n    function borrow(uint256 amount) external {\n        uint256 maxBorrow = collateral[msg.sender] * 100 / COLLATERAL_FACTOR;\n        require(debt[msg.sender] + amount <= maxBorrow, 'undercollateralized');\n        debt[msg.sender] += amount;\n    }\n\n    function repay(uint256 amount) external {\n        require(debt[msg.sender] >= amount, 'overpay');\n        debt[msg.sender] -= amount;\n    }\n\n    function withdrawCollateral(uint256 amount) external {\n        uint256 remaining = collateral[msg.sender] - amount;\n        uint256 maxBorrow = remaining * 100 / COLLATERAL_FACTOR;\n        require(debt[msg.sender] <= maxBorrow, 'would undercollateralize');\n        collateral[msg.sender] = remaining;\n    }\n}"
+    },
+    "expected_output": {
+      "case_id": "case-006",
+      "vulnerable": false,
+      "vulnerability_type": "",
+      "affected_function": "",
+      "explanation": ""
+    }
+  },
+  {
+    "id": "case-007",
+    "source_repo": "https://github.com/yearn/yearn-security/tree/master/disclosures",
+    "source_note": "Models the phantom shares bug where reward distribution is applied before updating user state, causing early redeemers to claim more rewards than entitled. Documented in Yearn and SushiSwap staking contract disclosures.",
+    "input": {
+      "contract": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.0;\n\ncontract StakingRewards {\n    mapping(address => uint256) public staked;\n    mapping(address => uint256) public rewardDebt;\n    uint256 public accRewardPerShare;\n    uint256 public totalStaked;\n\n    function stake(uint256 amount) external {\n        totalStaked += amount;\n        staked[msg.sender] += amount;\n    }\n\n    function distributeRewards(uint256 rewardAmount) external {\n        if (totalStaked > 0) {\n            accRewardPerShare += rewardAmount * 1e12 / totalStaked;\n        }\n    }\n\n    function harvest() external returns (uint256 reward) {\n        reward = staked[msg.sender] * accRewardPerShare / 1e12 - rewardDebt[msg.sender];\n        rewardDebt[msg.sender] = staked[msg.sender] * accRewardPerShare / 1e12;\n    }\n\n    function unstake(uint256 amount) external {\n        require(staked[msg.sender] >= amount, 'insufficient');\n        harvest();\n        staked[msg.sender] -= amount;\n        totalStaked -= amount;\n    }\n}"
+    },
+    "expected_output": {
+      "case_id": "case-007",
+      "vulnerable": true,
+      "vulnerability_type": "incorrect_reward_accounting",
+      "affected_function": "stake",
+      "explanation": "stake does not initialize rewardDebt for the staker, so a user who stakes after rewards have already been distributed can immediately harvest all accumulated rewards as if they were staked from the beginning."
+    }
+  },
+  {
+    "id": "case-008",
+    "source_repo": "https://github.com/code-423n4/2022-01-trader-joe-findings",
+    "source_note": "Models the deadline bypass via block.timestamp that was found in Trader Joe and multiple Uniswap fork audits. A miner can delay transaction inclusion to push through a stale swap.",
+    "input": {
+      "contract": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.0;\n\ncontract DEXRouter {\n    function swapExactTokensForTokens(\n        uint256 amountIn,\n        uint256 amountOutMin,\n        address[] calldata path,\n        address to,\n        uint256 deadline\n    ) external returns (uint256 amountOut) {\n        require(deadline >= block.timestamp, 'expired');\n        amountOut = amountIn * 97 / 100;\n        require(amountOut >= amountOutMin, 'slippage');\n    }\n\n    function swapWithSelfDeadline(\n        uint256 amountIn,\n        uint256 amountOutMin,\n        address[] calldata path,\n        address to\n    ) external returns (uint256 amountOut) {\n        require(block.timestamp >= block.timestamp, 'expired');\n        amountOut = amountIn * 97 / 100;\n        require(amountOut >= amountOutMin, 'slippage');\n    }\n}"
+    },
+    "expected_output": {
+      "case_id": "case-008",
+      "vulnerable": true,
+      "vulnerability_type": "ineffective_deadline",
+      "affected_function": "swapWithSelfDeadline",
+      "explanation": "swapWithSelfDeadline compares block.timestamp to itself, making the deadline check always true and providing no protection against stale transaction execution."
+    }
+  },
+  {
+    "id": "case-009",
+    "source_repo": "https://github.com/code-423n4/2022-05-cally-findings",
+    "source_note": "Models the auction frontrunning / griefing pattern where a bidder can outbid and immediately withdraw, preventing the legitimate winner from claiming. Documented in Cally and Blur auction audit findings.",
+    "input": {
+      "contract": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.0;\n\ncontract NFTAuction {\n    struct Auction {\n        address highestBidder;\n        uint256 highestBid;\n        uint256 endTime;\n        bool settled;\n    }\n\n    mapping(uint256 => Auction) public auctions;\n    mapping(address => uint256) public pendingReturns;\n\n    function bid(uint256 auctionId) external payable {\n        Auction storage a = auctions[auctionId];\n        require(block.timestamp < a.endTime, 'ended');\n        require(msg.value > a.highestBid, 'too low');\n        pendingReturns[a.highestBidder] += a.highestBid;\n        a.highestBidder = msg.sender;\n        a.highestBid = msg.value;\n    }\n\n    function withdraw() external {\n        uint256 amount = pendingReturns[msg.sender];\n        pendingReturns[msg.sender] = 0;\n        payable(msg.sender).transfer(amount);\n    }\n\n    function settle(uint256 auctionId) external {\n        Auction storage a = auctions[auctionId];\n        require(block.timestamp >= a.endTime, 'not ended');\n        require(!a.settled, 'settled');\n        a.settled = true;\n    }\n}"
+    },
+    "expected_output": {
+      "case_id": "case-009",
+      "vulnerable": false,
+      "vulnerability_type": "",
+      "affected_function": "",
+      "explanation": ""
+    }
+  },
+  {
+    "id": "case-010",
+    "source_repo": "https://github.com/sherlock-audit/2023-02-bond-findings",
+    "source_note": "Models the missing validation on discount bounds that allows a market creator to set an extreme discount, effectively giving away tokens for free. Based on Bond Protocol finding from Sherlock audit 2023-02.",
+    "input": {
+      "contract": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.0;\n\ncontract BondMarket {\n    struct Market {\n        address owner;\n        uint256 price;\n        uint256 discountBps;\n        uint256 sold;\n        uint256 capacity;\n    }\n\n    mapping(uint256 => Market) public markets;\n    uint256 public nextId;\n\n    function createMarket(\n        uint256 price,\n        uint256 discountBps,\n        uint256 capacity\n    ) external returns (uint256 id) {\n        id = nextId++;\n        markets[id] = Market(msg.sender, price, discountBps, 0, capacity);\n    }\n\n    function purchase(uint256 marketId, uint256 amount) external payable {\n        Market storage m = markets[marketId];\n        require(m.sold + amount <= m.capacity, 'sold out');\n        uint256 effectivePrice = m.price * (10000 - m.discountBps) / 10000;\n        require(msg.value >= effectivePrice * amount, 'insufficient payment');\n        m.sold += amount;\n    }\n}"
+    },
+    "expected_output": {
+      "case_id": "case-010",
+      "vulnerable": true,
+      "vulnerability_type": "missing_input_validation",
+      "affected_function": "createMarket",
+      "explanation": "createMarket does not validate that discountBps <= 10000, allowing a market creator to set a discount of 10000 or more, making effectivePrice zero and enabling buyers to drain tokens for free."
+    }
+  }
+]
