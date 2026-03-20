@@ -1,0 +1,9 @@
+{
+  "targets_category": "smart-contract-audit",
+  "recommended_model": "claude-opus-4-5",
+  "temperature": 0,
+  "output_schema": {
+    "findings": ["string"],
+    "severity": "none|low|medium|high|critical"
+  }
+}
