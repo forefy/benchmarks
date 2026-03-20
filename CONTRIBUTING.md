@@ -3,7 +3,7 @@
 ## Prerequisites
 
 - You must be a verified auditor on forefy.com.
-- Your benchmark must target a supported skill category (see forefy.com/skills for the current list).
+- Your benchmark will target specific skills - you select which skills it evaluates after registering on forefy.com.
 
 ## Steps
 
@@ -12,18 +12,18 @@
 3. Add the required files (see structure below).
 4. Open a PR. The title must be: `benchmark: <subdirectory-name>`.
 5. Once merged, register your benchmark at forefy.com/benchmarks using the subdirectory URL.
-6. Upload your private corpus (25 held-out cases) through the forefy.com dashboard.
+6. On the benchmark detail page, select which skills this benchmark targets.
+7. Upload your private corpus (25 held-out cases) through the forefy.com dashboard.
 
 ## Required files
 
 ### SKILL.md
-A skill definition with `category: benchmark`. This is used by forefy.com to ingest the benchmark. The name and description fields are what appears on the leaderboard.
+A skill definition used by forefy.com to ingest the benchmark. The name and description are what appear on the leaderboard.
 
 ```yaml
 ---
 name: My Benchmark Name
 description: One sentence describing what this benchmark evaluates.
-category: benchmark
 ---
 ```
 
@@ -32,7 +32,6 @@ Benchmark configuration and the canonical output schema skills must produce.
 
 ```json
 {
-  "targets_category": "smart-contract-audit",
   "recommended_model": "claude-opus-4-5",
   "temperature": 0,
   "output_schema": {
@@ -42,7 +41,6 @@ Benchmark configuration and the canonical output schema skills must produce.
 }
 ```
 
-- `targets_category`: must match a category that exists on forefy.com/skills.
 - `recommended_model`: advisory only - any model is accepted but shown on leaderboard.
 - `temperature`: must be 0 for reproducibility.
 - `output_schema`: the JSON schema the skill must output. scorer.py validates against this.
