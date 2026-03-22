@@ -43,11 +43,12 @@ For non-vulnerable cases, set `"vulnerable": false` and leave other fields as em
    c. Score with: `python scorer.py <skill-id>-output.json expected.json`
    d. Record the score.
 3. Print a ranked leaderboard of all skills by score (highest first).
-4. To submit a run to the platform, POST to `/api/benchmarks/<benchmark_id>/runs` with:
+4. To submit a run, POST to `https://forefy.com/api/benchmark-runs/token-submit` with header `X-Run-Token: <your token>` and body:
+   - `benchmark_skill_id`: the benchmark ID (provided in your run prompt)
    - `tested_skill_id`: the skill ID
    - `score`: the float from `scorer.py`
-   - `score_log`: the `findings` array from `<skill-id>-output.json` as a JSON string - this is the per-case output used to verify results
-   - `corpus_hash`: shown on the benchmark detail page (auto-filled when using the UI)
+   - `score_log`: the `findings` array from `<skill-id>-output.json` as a JSON string
+   - `corpus_hash`: provided in your run prompt
    - `model_id`: the model used for evaluation
    - `start_commit_sha` / `end_commit_sha`: before/after commit SHAs if you applied autoresearch improvements
    - `diff_patch`: the SKILL.md diff from autoresearch (omit or empty string if no changes were made)
