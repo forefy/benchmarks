@@ -1,15 +1,15 @@
 # forefy/benchmarks
 
-Community benchmark definitions for the [forefy.com](https://forefy.com) auditor skill registry.
+Community benchmark definitions for the [forefy.com/skills](https://forefy.com/skills) auditor skill registry.
 
 Each subdirectory is a self-contained benchmark that evaluates competing skills targeting the same task. Skills are scored on the same test cases and ranked - the benchmark is the arena, the skills are the contestants.
 
 ## How it works
 
 1. An auditor publishes a benchmark by opening a PR adding a new subdirectory.
-2. Skills that target the same task are registered against the benchmark on forefy.com.
+2. Skills that target the same task are registered against the benchmark on [forefy.com/skills/benchmarks](https://forefy.com/skills/benchmarks).
 3. Each skill is run against `expected.json` using `program.md` as the agent prompt.
-4. Scores are submitted to forefy.com and ranked on the leaderboard.
+4. Scores are submitted to [forefy.com/skills/benchmarks](https://forefy.com/skills/benchmarks) and ranked on the leaderboard.
 5. The benchmark author certifies results against a private held-out corpus to confirm they generalize.
 
 ## Benchmark structure
