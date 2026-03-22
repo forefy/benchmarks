@@ -13,79 +13,97 @@
 4. Open a PR. The title must be: `benchmark: <subdirectory-name>`.
 5. Once merged, register your benchmark at forefy.com/benchmarks using the subdirectory URL.
 6. On the benchmark detail page, select which skills this benchmark targets.
-7. Upload your private corpus (25 held-out cases) through the forefy.com dashboard.
 
 ## Required files
 
-### SKILL.md
-A skill definition used by forefy.com to ingest the benchmark. The name and description are what appear on the leaderboard.
+### program.md
+The single source of truth for the benchmark. Contains YAML frontmatter (read by forefy.com for registry ingestion) and the agent runner instructions.
 
-```yaml
+Frontmatter fields:
+- `name` (required): benchmark name shown on the leaderboard
+- `description` (required): one sentence describing what this benchmark evaluates
+- `recommended_model` (optional): advisory model for reproducibility
+- `temperature` (optional): must be 0 for deterministic scoring
+
+```md
 ---
 name: My Benchmark Name
 description: One sentence describing what this benchmark evaluates.
+recommended_model: claude-opus-4-5
+temperature: 0
 ---
+
+# My Benchmark - Runner
+
+## Invocation
+When running each skill against a case, use this exact prompt followed by the input:
+
+> [task-specific invocation matching the skill category]
+
+## Required Output Format
+...
+
+## Instructions
+1. Read `competing_skills` URLs from this file's YAML frontmatter.
+2. For each skill, fetch it from the registry (`GET /api/skills/<id>`), run it against every case in `corpus/public/` using the invocation above.
+3. Score with scorer.py and record results.
+4. Print a ranked leaderboard.
 ```
 
-### config.json
-Benchmark configuration and the canonical output schema skills must produce.
-
-```json
-{
-  "recommended_model": "claude-opus-4-5",
-  "temperature": 0,
-  "output_schema": {
-    "findings": ["string"],
-    "severity": "none|low|medium|high|critical"
-  }
-}
-```
+The invocation line is critical - it defines the exact prompt used to call each skill, ensuring fair and reproducible comparison across all competitors.
 
 - `recommended_model`: advisory only - any model is accepted but shown on leaderboard.
 - `temperature`: must be 0 for reproducibility.
 - `output_schema`: the JSON schema the skill must output. scorer.py validates against this.
 
 ### expected.json
-25 public test cases with ground truth. Community uses these for optimization.
+25 public test cases with ground truth (committed, platform-required). Community uses these for optimization and scoring.
 
 ```json
 [
   {
     "id": "case-001",
-    "input": {
-      "contract": "pragma solidity ^0.8.0; ..."
-    },
-    "expected_output": {
-      "findings": ["reentrancy at line 42"],
-      "severity": "high"
-    }
+    "vulnerable": true,
+    "vulnerability_type": "reentrancy",
+    "affected_function": "withdraw",
+    "explanation": "one sentence root cause"
   }
 ]
 ```
 
-- Keep inputs realistic - use anonymized or synthetic contracts.
-- Do not reuse cases from your private corpus.
-- `id` must be unique within the file and stable across benchmark versions.
+Case IDs map to contract folders in `corpus/public/<id>/`. Each folder may contain one or more `.sol` files.
+
+- Keep contracts realistic - use anonymized or synthetic code.
+- `id` must be unique and stable across benchmark versions.
+
+### corpus/
+Test case contracts split by visibility:
+
+```
+corpus/
+  public/     committed - community runs against these
+    case-001/
+      Contract.sol
+  private/    gitignored - auditor only, for certification
+    case-011/
+      Contract.sol
+```
+
+`corpus/private/` and `expected-private.json` are listed in `.gitignore` and never committed. The auditor maintains them locally to certify community submissions against unseen cases:
+
+```
+python scorer.py <skill>-output.json expected-private.json
+```
 
 ### scorer.py
-Pure Python, no LLM calls, deterministic. Must accept `--cases` and `--skill` arguments.
+Pure Python, no LLM calls, deterministic. Accepts two positional arguments: skill output JSON and expected JSON.
 
 ```
-python scorer.py --cases expected.json --skill path/to/skill.md
+python scorer.py <skill>-output.json expected.json
+python scorer.py <skill>-output.json expected-private.json
 ```
 
-Output format (stdout, JSON):
-```json
-{
-  "score": 0.84,
-  "passed": 21,
-  "total": 25,
-  "results": [
-    {"id": "case-001", "passed": true, "reason": ""},
-    {"id": "case-002", "passed": false, "reason": "missing reentrancy finding"}
-  ]
-}
-```
+Prints a float 0.0-1.0 to stdout.
 
 ### program.md
 Natural language instructions for the optimization agent. Explain:
@@ -94,11 +112,20 @@ Natural language instructions for the optimization agent. Explain:
 - How to run the scorer.
 - Any domain-specific guidance.
 
+### competing_skills (frontmatter)
+The list of registry skill URLs entered in this benchmark, declared in `program.md` YAML frontmatter. The runner fetches each skill live from the registry at run time - no local copies needed.
+
+```yaml
+competing_skills:
+  - https://forefy.com/skills/<uuid>
+  - https://forefy.com/skills/<uuid>
+```
+
+Skills are always fetched at their current registry version. Each run records `start_commit_sha` / `end_commit_sha` to pin exactly which version was scored.
+
 ## Private corpus
 
-After your benchmark is merged and registered on forefy.com, upload your private corpus through the dashboard. The private corpus contains 25 held-out cases used by you to certify community submissions for overfitting.
-
-The private corpus never leaves your machine in plaintext - it is encrypted at rest on forefy.com servers and only you can download it.
+The private corpus (`corpus/private/` + `expected-private.json`) lives only on the auditor's machine - never committed. Use it to certify community submissions against unseen cases and detect overfitting.
 
 ## Versioning
 

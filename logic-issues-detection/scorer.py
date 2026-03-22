@@ -6,6 +6,8 @@ Usage: python scorer.py <output.json> <expected.json>
 output.json must contain:
   {"findings": [{"case_id": "...", "vulnerable": bool, "vulnerability_type": "...", "affected_function": "...", "explanation": "..."}, ...]}
 
+expected.json is a lean array of expected outputs (no inline contracts - contracts live in cases/<id>.sol).
+
 Returns a float 0.0-1.0 printed to stdout.
 Exit code 0 on success, 1 on error.
 """
@@ -29,7 +31,7 @@ def score_case(output: dict, expected: dict) -> float:
       - vulnerable flag correct: 0.5 pts
       - if vulnerable=True: affected_function correct adds 0.3 pts
       - if vulnerable=True: vulnerability_type correct adds 0.2 pts
-    Non-vulnerable cases: only the vulnerable flag matters (0.5 each, normalized to 1.0).
+    Non-vulnerable cases: only the vulnerable flag matters (1.0 or 0.0).
     """
     is_vuln_expected = expected.get("vulnerable", False)
     is_vuln_output = output.get("vulnerable", False)
@@ -84,13 +86,11 @@ def main() -> None:
     total_score = 0.0
     for case in expected_data:
         case_id = case.get("id", "")
-        expected_output = case.get("expected_output", {})
         output = output_by_id.get(case_id, {})
-        total_score += score_case(output, expected_output)
+        total_score += score_case(output, case)
 
     final_score = total_score / total_cases
     print(f"{final_score:.4f}")
-
 
 if __name__ == "__main__":
     main()

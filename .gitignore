@@ -1,4 +1,5 @@
-corpus/
+**/corpus/private/
+expected-private.json
 __pycache__/
 *.pyc
 *.pyo
