@@ -16,7 +16,7 @@ Each subdirectory is a self-contained benchmark that evaluates competing skills 
 
 ```
 my-benchmark/
-  program.md            single source of truth: frontmatter (name, description, model, temperature, competing_skills) + runner instructions
+  program.md            single source of truth: frontmatter (name, description, model, temperature) + runner instructions
   expected.json         public test cases with ground truth (platform-required, committed)
   expected-private.json auditor-only private test cases (gitignored)
   scorer.py             deterministic Python scorer (no LLM calls)
@@ -29,11 +29,11 @@ my-benchmark/
       case-012/
 ```
 
-Competing skills are declared as registry URLs in `program.md` frontmatter and fetched live at run time - no local copies.
+Competing skills are registered as targets on the benchmark detail page at forefy.com and fetched live at run time - no local copies needed.
 
 ## Running a benchmark
 
-Load `program.md` as your agent prompt in any agent environment with file and bash access (autoresearch, Claude Code, etc.). The agent reads `competing_skills` from the frontmatter, fetches each skill from the registry, scores each against `corpus/public/` with `scorer.py`, and reports the ranked results.
+Load `program.md` as your agent prompt in any agent environment with file and bash access (autoresearch, Claude Code, etc.). The agent fetches target skills from the registry (`GET /api/benchmarks/<id>/targets`), scores each against `corpus/public/` with `scorer.py`, and reports the ranked results.
 
 ## Submitting a new benchmark
 

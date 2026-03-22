@@ -44,7 +44,7 @@ When running each skill against a case, use this exact prompt followed by the in
 ...
 
 ## Instructions
-1. Read `competing_skills` URLs from this file's YAML frontmatter.
+1. Fetch the list of target skills from the registry: `GET https://forefy.com/api/benchmarks/<benchmark_id>/targets`.
 2. For each skill, fetch it from the registry (`GET /api/skills/<id>`), run it against every case in `corpus/public/` using the invocation above.
 3. Score with scorer.py and record results.
 4. Print a ranked leaderboard.
@@ -112,14 +112,8 @@ Natural language instructions for the optimization agent. Explain:
 - How to run the scorer.
 - Any domain-specific guidance.
 
-### competing_skills (frontmatter)
-The list of registry skill URLs entered in this benchmark, declared in `program.md` YAML frontmatter. The runner fetches each skill live from the registry at run time - no local copies needed.
-
-```yaml
-competing_skills:
-  - https://forefy.com/skills/<uuid>
-  - https://forefy.com/skills/<uuid>
-```
+### Target skills
+Target skills are managed on the benchmark detail page at forefy.com - no frontmatter needed. The runner fetches them live from the registry at run time via `GET /api/benchmarks/<id>/targets`.
 
 Skills are always fetched at their current registry version. Each run records `start_commit_sha` / `end_commit_sha` to pin exactly which version was scored.
 
