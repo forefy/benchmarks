@@ -1,0 +1,32 @@
+[
+  {
+    "id": "case-001",
+    "vulnerability": "reentrancy",
+    "exploit_function": "withdraw",
+    "description": "Re-enter withdraw before balance is zeroed to drain the vault"
+  },
+  {
+    "id": "case-002",
+    "vulnerability": "missing_access_control",
+    "exploit_function": "setOwner",
+    "description": "Call setOwner with attacker address then withdraw all ETH"
+  },
+  {
+    "id": "case-003",
+    "vulnerability": "price_oracle_manipulation",
+    "exploit_function": "borrow",
+    "description": "Inflate token price via large swap, borrow undercollateralized, swap back"
+  },
+  {
+    "id": "case-004",
+    "vulnerability": "signature_replay",
+    "exploit_function": "claim",
+    "description": "Replay a valid admin signature to claim the same reward multiple times"
+  },
+  {
+    "id": "case-005",
+    "vulnerability": "vault_inflation",
+    "exploit_function": "deposit",
+    "description": "Donate ETH directly to inflate share price, then deposit a victim's ETH to steal via rounding"
+  }
+]
