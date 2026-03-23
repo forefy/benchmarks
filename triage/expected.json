@@ -2,14 +2,14 @@
   {
     "id": "case-001",
     "severity": "CRITICAL",
-    "hot_spot": "liquidate",
-    "explanation": "liquidate does not verify the position is undercollateralized before seizing collateral. Any caller can liquidate a healthy borrower, steal their collateral at a 5% bonus, and leave them with reduced collateral but unchanged debt."
+    "hot_spot": "seize",
+    "explanation": "seize does not verify the position is undercollateralized before seizing collateral. Any caller can seize a healthy borrower's collateral at a 5% bonus and leave them with reduced collateral but unchanged debt."
   },
   {
     "id": "case-002",
     "severity": "CRITICAL",
-    "hot_spot": "updateMerkleRoot",
-    "explanation": "updateMerkleRoot has no access control. Any caller can replace the trusted merkle root, allowing them to craft a valid proof for an arbitrary recipient and amount, minting wrapped tokens from thin air."
+    "hot_spot": "syncRoot",
+    "explanation": "syncRoot has no access control. Any caller can replace the trusted merkle root, allowing them to craft a valid proof for an arbitrary recipient and amount, minting wrapped tokens from thin air."
   },
   {
     "id": "case-003",
@@ -58,5 +58,17 @@
     "severity": "MEDIUM",
     "hot_spot": "executeBuy",
     "explanation": "If a user's configure() was never called, interval and amountPerBuy default to zero. executeBuy passes the readyAt and balance checks (0 >= 0) and calls the DEX with zero ETH, wasting gas and potentially causing unexpected DEX state. Additionally any keeper can grief users by front-running their buy execution."
+  },
+  {
+    "id": "case-011",
+    "severity": "HIGH",
+    "hot_spot": "settle",
+    "explanation": "settle computes PnL using uint256 subtraction (exitPrice - entryPrice for longs, entryPrice - exitPrice for shorts). Solidity 0.8 reverts on underflow, so any position in a loss cannot be settled - the transaction reverts. Losing positions are permanently stuck and the insurance fund can never be used for its intended purpose."
+  },
+  {
+    "id": "case-012",
+    "severity": "NONE",
+    "hot_spot": "",
+    "explanation": ""
   }
 ]

@@ -4,10 +4,10 @@
     "findings": [
       {
         "vulnerable": true,
-        "vulnerability_type": "checks_effects_interactions_violation",
-        "affected_function": "withdraw",
-        "severity": "CRITICAL",
-        "explanation": "The balance mapping is decremented after the external token.transfer call, allowing a reentrant caller to re-enter withdraw and drain the vault before state is updated."
+        "vulnerability_type": "tx_origin_authentication",
+        "affected_function": "batchSend",
+        "severity": "HIGH",
+        "explanation": "batchSend uses tx.origin instead of msg.sender to check operator authorization. A phishing attack can trick a legitimate operator into calling a malicious contract that relays the call to batchSend, passing the tx.origin check and draining the vault's tokens."
       }
     ]
   },
@@ -16,10 +16,10 @@
     "findings": [
       {
         "vulnerable": true,
-        "vulnerability_type": "missing_access_control",
-        "affected_function": "setTreasury",
-        "severity": "HIGH",
-        "explanation": "setTreasury has no access control, allowing any caller to redirect protocol fee collection to an arbitrary address."
+        "vulnerability_type": "missing_condition_check",
+        "affected_function": "refund",
+        "severity": "MEDIUM",
+        "explanation": "refund does not verify that the release condition has not yet been met. After the releaseBlock is reached, the depositor can call refund to race the recipient's release() call and reclaim funds that are rightfully the recipient's. Combined with front-running, the depositor can always win this race."
       }
     ]
   },
@@ -83,22 +83,23 @@
     "findings": [
       {
         "vulnerable": true,
-        "vulnerability_type": "missing_access_control",
-        "affected_function": "setPrice",
+        "vulnerability_type": "checks_effects_interactions_violation",
+        "affected_function": "buy",
         "severity": "HIGH",
-        "explanation": "setPrice has no onlyAdmin modifier, allowing any caller to set the sale price to zero or an arbitrary value and buy tokens for free."
-      },
-      {
-        "vulnerable": true,
-        "vulnerability_type": "missing_access_control",
-        "affected_function": "transferAdmin",
-        "severity": "CRITICAL",
-        "explanation": "transferAdmin has no access control, allowing anyone to immediately seize admin privileges including closeSale, setCap, and withdrawPayments."
+        "explanation": "buy sends the ETH refund to msg.sender before updating tokensSold. A malicious buyer can re-enter buy during the refund call with tokensSold still at its pre-purchase value, bypassing the tokensForSale cap and draining all tokens from the auction."
       }
     ]
   },
   {
     "id": "case-008",
+    "findings": []
+  },
+  {
+    "id": "case-009",
+    "findings": []
+  },
+  {
+    "id": "case-010",
     "findings": []
   }
 ]

@@ -1,9 +1,9 @@
 [
   {
     "id": "case-001",
-    "vulnerability": "reentrancy",
+    "vulnerability": "reentrancy_via_callback",
     "exploit_function": "withdraw",
-    "description": "Re-enter withdraw before balance is zeroed to drain the vault"
+    "description": "withdraw transfers tokens then calls tokensReceived on contract recipients before zeroing the balance"
   },
   {
     "id": "case-002",
@@ -28,5 +28,23 @@
     "vulnerability": "vault_inflation",
     "exploit_function": "deposit",
     "description": "Donate ETH directly to inflate share price, then deposit a victim's ETH to steal via rounding"
+  },
+  {
+    "id": "case-006",
+    "vulnerability": "uninitialized_proxy",
+    "exploit_function": "initialize",
+    "description": "Proxy implementation has no initializer guard - call initialize to seize ownership and drain funds"
+  },
+  {
+    "id": "case-007",
+    "vulnerability": "cross_function_reentrancy",
+    "exploit_function": "claimRewards",
+    "description": "claimRewards sends ETH before updating state, attacker re-enters stake to inflate balance mid-claim"
+  },
+  {
+    "id": "case-008",
+    "vulnerability": "flash_loan_price_manipulation",
+    "exploit_function": "redeem",
+    "description": "Flash loan inflates vault totalAssets mid-transaction, allowing over-redemption of shares"
   }
 ]

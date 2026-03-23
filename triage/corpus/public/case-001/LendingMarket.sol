@@ -35,7 +35,7 @@ contract LendingMarket {
         borrowed[msg.sender] -= amount;
     }
 
-    function liquidate(address user, uint256 repayAmount) external {
+    function seize(address user, uint256 repayAmount) external {
         require(borrowed[user] > 0, "no debt");
         debt.transferFrom(msg.sender, address(this), repayAmount);
         borrowed[user] -= repayAmount;

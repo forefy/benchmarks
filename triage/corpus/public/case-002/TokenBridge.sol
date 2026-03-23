@@ -48,7 +48,7 @@ contract TokenBridge {
         return bytes32(0);
     }
 
-    function updateMerkleRoot(bytes32 newRoot) external {
+    function syncRoot(bytes32 newRoot) external {
         merkleRoot = newRoot;
     }
 }

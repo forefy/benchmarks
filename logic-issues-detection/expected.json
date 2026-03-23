@@ -51,29 +51,57 @@
   {
     "id": "case-011",
     "vulnerable": true,
-    "vulnerability_type": "incorrect_accounting",
+    "vulnerability_type": "cliff_elapsed_miscalculation",
     "affected_function": "vested",
     "explanation": "After the cliff, elapsed is calculated from grant start rather than from start + cliff. At the moment of cliff expiry a beneficiary can immediately claim all tokens that accrued during the cliff period, defeating the purpose of the cliff entirely."
   },
   {
     "id": "case-013",
     "vulnerable": true,
-    "vulnerability_type": "incorrect_accounting",
+    "vulnerability_type": "incorrect_repayment_check",
     "affected_function": "flashLoan",
     "explanation": "The repayment check requires balanceOf >= balanceBefore - amount + fee instead of >= balanceBefore + fee. After transferring amount out, balanceBefore - amount is the depleted balance, so the borrower only needs to return fee tokens rather than amount + fee, effectively borrowing for free."
   },
   {
     "id": "case-014",
     "vulnerable": true,
-    "vulnerability_type": "incorrect_accounting",
+    "vulnerability_type": "missing_snapshot_check",
     "affected_function": "castVote",
     "explanation": "castVote reads token.balanceOf(msg.sender) at voting time rather than at snapshotBlock recorded when the proposal was created. An attacker can acquire tokens after a proposal is created, vote with the full balance, then immediately sell, manipulating governance outcomes without long-term token commitment."
   },
   {
     "id": "case-015",
     "vulnerable": true,
-    "vulnerability_type": "incorrect_accounting",
+    "vulnerability_type": "incorrect_reserve_ordering",
     "affected_function": "buy",
     "explanation": "buy adds reserveAmount to reserveBalance before using it to compute tokensOut, so the denominator in the price formula already includes the incoming payment. This causes the contract to underestimate the price impact and mint more tokens than the bonding curve invariant allows, diluting all existing holders."
+  },
+  {
+    "id": "case-016",
+    "vulnerable": false,
+    "vulnerability_type": "",
+    "affected_function": "",
+    "explanation": ""
+  },
+  {
+    "id": "case-017",
+    "vulnerable": false,
+    "vulnerability_type": "",
+    "affected_function": "",
+    "explanation": ""
+  },
+  {
+    "id": "case-018",
+    "vulnerable": false,
+    "vulnerability_type": "",
+    "affected_function": "",
+    "explanation": ""
+  },
+  {
+    "id": "case-019",
+    "vulnerable": false,
+    "vulnerability_type": "",
+    "affected_function": "",
+    "explanation": ""
   }
 ]
