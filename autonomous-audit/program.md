@@ -1,7 +1,6 @@
 ---
 name: Autonomous Audit
 description: Evaluates a skill's ability to perform a comprehensive security audit across common vulnerability classes - reentrancy, access control, input validation, signature security, and more - using realistic Solidity contracts.
-recommended_model: claude-sonnet-4-6
 ---
 
 # Autonomous Audit

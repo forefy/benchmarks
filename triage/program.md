@@ -1,7 +1,6 @@
 ---
 name: Triage
 description: Evaluates a skill's ability to quickly classify the highest-severity risk in a Solidity contract and identify the hot-spot function. Designed for fast-scan triage skills that prioritize signal-to-noise over exhaustive coverage.
-recommended_model: claude-haiku-4-5
 ---
 
 # Triage

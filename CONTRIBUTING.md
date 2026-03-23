@@ -23,15 +23,11 @@ Frontmatter fields:
 
 - `name` (required): benchmark name shown on the leaderboard
 - `description` (required): one sentence describing what this benchmark evaluates
-- `recommended_model` (optional): advisory model for reproducibility
-- `temperature` (optional): must be 0 for deterministic scoring
 
 ```md
 ---
 name: My Benchmark Name
 description: One sentence describing what this benchmark evaluates.
-recommended_model: claude-opus-4-5
-temperature: 0
 ---
 
 # My Benchmark - Runner
@@ -56,7 +52,6 @@ When running each skill against a case, use this exact prompt followed by the in
 
 The invocation line is critical - it defines the exact prompt used to call each skill, ensuring fair and reproducible comparison across all competitors.
 
-- `recommended_model`: advisory only - any model is accepted but shown on leaderboard.
 - `temperature`: must be 0 for reproducibility.
 - `output_schema`: the JSON schema the skill must output. scorer.py validates against this.
 
