@@ -1,32 +1,55 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import '@openzeppelin/contracts/access/Ownable.sol';
-
-contract StableLending is Ownable {
+contract StableLending {
     mapping(address => uint256) public collateral;
     mapping(address => uint256) public debt;
     uint256 public constant COLLATERAL_FACTOR = 150;
+    address public owner;
 
-    function depositCollateral(uint256 amount) external {
-        collateral[msg.sender] += amount;
+    bool private _locked;
+
+    modifier nonReentrant() {
+        require(!_locked, 'reentrant');
+        _locked = true;
+        _;
+        _locked = false;
     }
 
-    function borrow(uint256 amount) external {
+    modifier onlyOwner() {
+        require(msg.sender == owner, 'unauthorized');
+        _;
+    }
+
+    constructor() {
+        owner = msg.sender;
+    }
+
+    function depositCollateral() external payable nonReentrant {
+        collateral[msg.sender] += msg.value;
+    }
+
+    function borrow(uint256 amount) external nonReentrant {
         uint256 maxBorrow = collateral[msg.sender] * 100 / COLLATERAL_FACTOR;
         require(debt[msg.sender] + amount <= maxBorrow, 'undercollateralized');
         debt[msg.sender] += amount;
+        (bool ok,) = msg.sender.call{value: amount}("");
+        require(ok, 'transfer failed');
     }
 
-    function repay(uint256 amount) external {
-        require(debt[msg.sender] >= amount, 'overpay');
-        debt[msg.sender] -= amount;
+    function repay() external payable nonReentrant {
+        require(debt[msg.sender] >= msg.value, 'overpay');
+        debt[msg.sender] -= msg.value;
     }
 
-    function withdrawCollateral(uint256 amount) external {
+    function withdrawCollateral(uint256 amount) external nonReentrant {
         uint256 remaining = collateral[msg.sender] - amount;
         uint256 maxBorrow = remaining * 100 / COLLATERAL_FACTOR;
         require(debt[msg.sender] <= maxBorrow, 'would undercollateralize');
         collateral[msg.sender] = remaining;
+        (bool ok,) = msg.sender.call{value: amount}("");
+        require(ok, 'transfer failed');
     }
+
+    receive() external payable {}
 }

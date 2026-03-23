@@ -14,13 +14,14 @@ contract DEXRouter {
         require(amountOut >= amountOutMin, 'slippage');
     }
 
-    function swapWithSelfDeadline(
+    function swapWithPermit(
         uint256 amountIn,
         uint256 amountOutMin,
         address[] calldata path,
-        address to
+        address to,
+        uint256 deadline
     ) external returns (uint256 amountOut) {
-        require(block.timestamp >= block.timestamp, 'expired');
+        require(block.timestamp >= deadline, 'not ready');
         amountOut = amountIn * 97 / 100;
         require(amountOut >= amountOutMin, 'slippage');
     }

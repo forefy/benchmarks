@@ -1,6 +1,6 @@
-# forefy/benchmarks
+# Auditor Skill Registry Benchmarks
 
-Community benchmark definitions for the [forefy.com/skills](https://forefy.com/skills) auditor skill registry.
+Community benchmark definitions for the [forefy.com/skills](https://forefy.com/skills) Auditor Skill Registry.
 
 Each subdirectory is a self-contained benchmark that evaluates competing skills targeting the same task. Skills are scored on the same test cases and ranked - the benchmark is the arena, the skills are the contestants.
 

@@ -4,7 +4,7 @@
     "vulnerable": true,
     "vulnerability_type": "price_manipulation",
     "affected_function": "getPrice",
-    "explanation": "getPrice uses instantaneous spot balances as the price oracle, making it trivially manipulable via a flash loan within the same transaction."
+    "explanation": "The TWAP window accumulates only one sample per block update call, meaning a single update() call in the same block as a borrow() still uses spot price. An attacker can manipulate balances via flash loan, call update(), then borrow() within one transaction to use the manipulated price."
   },
   {
     "id": "case-002",
@@ -52,8 +52,8 @@
     "id": "case-008",
     "vulnerable": true,
     "vulnerability_type": "ineffective_deadline",
-    "affected_function": "swapWithSelfDeadline",
-    "explanation": "swapWithSelfDeadline compares block.timestamp to itself, making the deadline check always true and providing no protection against stale transaction execution."
+    "affected_function": "swapWithPermit",
+    "explanation": "swapWithPermit uses block.timestamp >= deadline, which only allows execution after the deadline has passed — the opposite of the intended protection. The misleading error message 'not ready' makes the check appear intentional."
   },
   {
     "id": "case-009",
@@ -68,5 +68,40 @@
     "vulnerability_type": "missing_input_validation",
     "affected_function": "createMarket",
     "explanation": "createMarket does not validate that discountBps <= 10000, allowing a market creator to set a discount of 10000 or more, making effectivePrice zero and enabling buyers to drain tokens for free."
+  },
+  {
+    "id": "case-011",
+    "vulnerable": true,
+    "vulnerability_type": "incorrect_accounting",
+    "affected_function": "vested",
+    "explanation": "After the cliff, elapsed is calculated from grant start rather than from start + cliff. At the moment of cliff expiry a beneficiary can immediately claim all tokens that accrued during the cliff period, defeating the purpose of the cliff entirely."
+  },
+  {
+    "id": "case-012",
+    "vulnerable": true,
+    "vulnerability_type": "checks_effects_interactions_violation",
+    "affected_function": "withdrawTo",
+    "explanation": "withdrawTo makes an external call before zeroing deposits[msg.sender], and unlike deposit and cancel it has no nonReentrant guard. A malicious recipient contract can re-enter withdrawTo to drain the full vault balance."
+  },
+  {
+    "id": "case-013",
+    "vulnerable": true,
+    "vulnerability_type": "incorrect_accounting",
+    "affected_function": "flashLoan",
+    "explanation": "The repayment check requires balanceOf >= balanceBefore - amount + fee instead of >= balanceBefore + fee. After transferring amount out, balanceBefore - amount is the depleted balance, so the borrower only needs to return fee tokens rather than amount + fee, effectively borrowing for free."
+  },
+  {
+    "id": "case-014",
+    "vulnerable": true,
+    "vulnerability_type": "incorrect_accounting",
+    "affected_function": "castVote",
+    "explanation": "castVote reads token.balanceOf(msg.sender) at voting time rather than at snapshotBlock recorded when the proposal was created. An attacker can acquire tokens after a proposal is created, vote with the full balance, then immediately sell, manipulating governance outcomes without long-term token commitment."
+  },
+  {
+    "id": "case-015",
+    "vulnerable": true,
+    "vulnerability_type": "incorrect_accounting",
+    "affected_function": "buy",
+    "explanation": "buy adds reserveAmount to reserveBalance before using it to compute tokensOut, so the denominator in the price formula already includes the incoming payment. This causes the contract to underestimate the price impact and mint more tokens than the bonding curve invariant allows, diluting all existing holders."
   }
 ]
