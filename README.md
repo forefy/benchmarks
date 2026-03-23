@@ -2,19 +2,15 @@
 
 Public benchmarks for agentic smart contract auditing skills.
 
-
-
-Community benchmark definitions for the [forefy.com/skills](https://forefy.com/skills) Auditor Skill Registry.
-
-Each subdirectory is a self-contained benchmark that evaluates competing skills targeting the same task. Skills are scored on the same test cases and ranked - the benchmark is the arena, the skills are the contestants.
+Each subdirectory is a self-contained benchmark that evaluates competing skills targeting the same task, via autoresearch style loops that also submit results to public record, and also creates optimized skills locally for the benchmark runner.
 
 ## How it works
 
-1. An auditor publishes a benchmark by opening a PR adding a new subdirectory.
-2. Skills that target the same task are registered against the benchmark on [forefy.com/skills/benchmarks](https://forefy.com/skills/benchmarks).
-3. Each skill is run against `expected.json` using `program.md` as the agent prompt.
-4. Scores are submitted to [forefy.com/skills/benchmarks](https://forefy.com/skills/benchmarks) and ranked on the leaderboard.
-5. The benchmark author certifies results against a private held-out corpus to confirm they generalize.
+1. Anyone can open a benchmark by opening a PR adding a new subdirectory.
+2. Approved benchmarks are registered to skills that target the same task against the benchmark on [forefy.com/skills/benchmarks](https://forefy.com/skills/benchmarks).
+3. Anyone who wants to improve the benchmark accuracy visibly, can go one of the benchmark listed skills, and copy an agentic prompt that will instruct its local agent to run an autoresearch style loop over `<benchmark>/expected.json` using `<benchmark>/program.md` as the agent prompt
+4. Agents submit score to [forefy.com/skills/benchmarks](https://forefy.com/skills/benchmarks) and results are tracked on the leaderboard.
+5. Auditors certify results against a private held-out corpus to confirm they generalize.
 
 ## Benchmark structure
 
@@ -33,7 +29,7 @@ my-benchmark/
       case-012/
 ```
 
-Competing skills are registered as targets on the benchmark detail page at forefy.com and fetched live at run time - no local copies needed.
+Competing skills are registered as targets on the benchmark detail page at the skill registry ([forefy.com/skills](https://forefy.com/skills)) and fetched live at run time - no local copies needed.
 
 ## Running a benchmark
 
