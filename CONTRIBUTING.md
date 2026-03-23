@@ -10,7 +10,7 @@
 2. Create a new subdirectory using lowercase letters, numbers, and hyphens (e.g. `reentrancy-detection`).
 3. Add the required files (see structure below).
 4. Open a PR. The title must be: `benchmark: <subdirectory-name>`.
-5. Once merged, a community auditor will register your benchmark at [forefy.com/skills/benchmarks](https://forefy.com/skills/benchmarks) using the subdirectory URL.
+5. Once merged, a community auditor will register your benchmark at [forefy.com/benchmarks](https://forefy.com/benchmarks) using the subdirectory URL.
 6. On the benchmark detail page, select which skills this benchmark targets.
 
 ## Required files

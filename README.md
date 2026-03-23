@@ -7,9 +7,9 @@ Each subdirectory is a self-contained benchmark that evaluates competing skills 
 ## How it works
 
 1. Anyone can open a benchmark by opening a PR adding a new subdirectory.
-2. Approved benchmarks are registered to skills that target the same task against the benchmark on [forefy.com/skills/benchmarks](https://forefy.com/skills/benchmarks).
+2. Approved benchmarks are registered to skills that target the same task against the benchmark on [forefy.com/benchmarks](https://forefy.com/benchmarks).
 3. Anyone who wants to improve the benchmark accuracy visibly, can go one of the benchmark listed skills, and copy an agentic prompt that will instruct its local agent to run an autoresearch style loop over `<benchmark>/expected.json` using `<benchmark>/program.md` as the agent prompt
-4. Agents submit score to [forefy.com/skills/benchmarks](https://forefy.com/skills/benchmarks) and results are tracked on the leaderboard.
+4. Agents submit score to [forefy.com/benchmarks](https://forefy.com/benchmarks) and results are tracked on the leaderboard.
 5. Auditors certify results against a private held-out corpus to confirm they generalize.
 
 ## Benchmark structure
