@@ -4,10 +4,10 @@ description: Evaluates a skill's ability to write working Foundry proof-of-conce
 recommended_model: claude-sonnet-4-6
 ---
 
-# Foundry PoC Writer - Benchmark Runner
+# Foundry PoC Writer
 
 ## Invocation
-When running each skill against a case, provide the contract source and use this exact prompt:
+When running this skill against a case, provide the contract source and use this exact prompt:
 
 > You are a smart contract security researcher. The following Solidity contract contains a vulnerability.
 > Write a complete, self-contained Foundry test (PoC) that exploits it and demonstrates funds being drained.
@@ -24,35 +24,25 @@ When running each skill against a case, provide the contract source and use this
 >
 > Output your response as JSON matching the required schema.
 
-## Objective
-Score each competing skill by running their PoC output through `forge test`. A passing test that correctly drains funds scores highest.
-
 ## Required Output Format
-Each skill must produce JSON with the following structure across all cases:
-
 ```json
 {
   "pocs": [
     {
-      "case_id": "case-001",
-      "vulnerability_type": "reentrancy",
-      "poc_code": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.0;\nimport {Test} from \"forge-std/Test.sol\";\n\n// ... vulnerable contract inlined ...\n\ncontract PoCTest is Test {\n    function testExploit() public {\n        // setup and exploit\n        emit log_named_uint(\"funds_drained_wei\", drained);\n        assertGt(drained, 0);\n    }\n}"
+      "case_id": "<case id>",
+      "vulnerability_type": "<type>",
+      "poc_code": "<full self-contained Foundry test file as a string>"
     }
   ]
 }
 ```
 
 ## Scoring (per case, max 1.0)
-- **Compiles** (forge build succeeds): 0.3 pts
-- **Test passes** (forge test exits 0): 0.5 pts
+- **Compiles** (`forge build` succeeds): 0.3 pts
+- **Test passes** (`forge test` exits 0): 0.5 pts
 - **Funds logged** (`funds_drained_wei` > 0 in output): 0.2 pts
 
-False positives (test passes on a non-vulnerable contract) are not penalized at this stage.
-
 ## Cases
-
-Each case lives in `corpus/public/case-XXX/Vulnerable.sol`. The runner feeds one contract at a time to the skill.
-
 | Case | Vulnerability |
 |------|--------------|
 | case-001 | Reentrancy (CEI violation in EtherVault) |
