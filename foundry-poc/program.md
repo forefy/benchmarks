@@ -66,3 +66,15 @@ Each case lives in `corpus/public/case-XXX/Vulnerable.sol`. The runner feeds one
 - The scorer creates an isolated temp foundry project per case
 - Solidity version: `^0.8.0`; no external lib imports needed
 - Each PoC must be self-contained (inline the vulnerable contract)
+
+## Submission
+
+To submit a run, POST to `https://forefy.com/api/benchmark-runs/token-submit` with header `X-Run-Token: <your token>` and body:
+- `benchmark_skill_id`: the benchmark ID (provided in your run prompt)
+- `tested_skill_id`: the skill ID
+- `score`: the float from `scorer.py`
+- `score_log`: the full `pocs` array from the skill's output JSON as a JSON string
+- `corpus_hash`: provided in your run prompt
+- `model_id`: the model used for evaluation
+- `start_commit_sha` / `end_commit_sha`: before/after commit SHAs if you applied autoresearch improvements
+- `diff_patch`: the SKILL.md diff from autoresearch (omit or empty string if no changes were made)
