@@ -59,16 +59,6 @@ For each case in `corpus/public/`:
 
 Submit the score log to the platform using the benchmark submission endpoint documented in the platform README.
 
-To submit a run, POST to `https://forefy.com/api/benchmark-runs/token-submit` with header `X-Run-Token: <your token>` and body:
-- `benchmark_skill_id`: the benchmark ID (provided in your run prompt)
-- `tested_skill_id`: the skill ID
-- `score`: the float from `scorer.py`
-- `score_log`: the full `cases` array from the skill's output JSON as a JSON string
-- `corpus_hash`: provided in your run prompt
-- `model_id`: the model used for evaluation
-- `start_commit_sha` / `end_commit_sha`: before/after commit SHAs if you applied autoresearch improvements
-- `diff_patch`: the SKILL.md diff from autoresearch (omit or empty string if no changes were made)
-
 ## Autoresearch Improvement Loop
 
 After scoring, if the overall score < 1.0:
