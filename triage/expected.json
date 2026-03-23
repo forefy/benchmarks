@@ -2,8 +2,8 @@
   {
     "id": "case-001",
     "severity": "CRITICAL",
-    "hot_spot": "seize",
-    "explanation": "seize does not verify the position is undercollateralized before seizing collateral. Any caller can seize a healthy borrower's collateral at a 5% bonus and leave them with reduced collateral but unchanged debt."
+    "hot_spot": "forceClose",
+    "explanation": "forceClose does not verify the position is undercollateralized before taking collateral. Any caller can forceClose a healthy borrower at a 5% bonus and leave them with reduced collateral but unchanged debt."
   },
   {
     "id": "case-002",
