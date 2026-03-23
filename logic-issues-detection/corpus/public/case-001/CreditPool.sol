@@ -5,7 +5,7 @@ interface IERC20 {
     function balanceOf(address) external view returns (uint256);
 }
 
-contract TWAPOracle {
+contract CreditPool {
     address public token;
     address public weth;
 

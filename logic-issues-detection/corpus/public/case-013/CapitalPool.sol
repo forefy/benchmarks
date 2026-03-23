@@ -10,7 +10,7 @@ interface IFlashBorrower {
     function onFlashLoan(address token, uint256 amount, uint256 fee, bytes calldata data) external;
 }
 
-contract FlashLender {
+contract CapitalPool {
     IERC20 public token;
     uint256 public constant FEE_BPS = 30;
 

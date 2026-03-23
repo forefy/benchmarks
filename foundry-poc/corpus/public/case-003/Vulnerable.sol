@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-contract SpotOracle {
+contract ExchangeRouter {
     uint256 public reserveETH;
     uint256 public reserveToken;
 
@@ -32,11 +32,11 @@ contract SpotOracle {
 }
 
 contract LendingPool {
-    SpotOracle public oracle;
+    ExchangeRouter public oracle;
     mapping(address => uint256) public collateralToken;
     mapping(address => uint256) public debtETH;
 
-    constructor(SpotOracle _oracle) {
+    constructor(ExchangeRouter _oracle) {
         oracle = _oracle;
     }
 
