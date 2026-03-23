@@ -14,20 +14,6 @@
     "explanation": "Integer division truncates shares to zero for amounts smaller than borrowIndex, allowing a borrower to receive tokens without being assigned any repayment obligation."
   },
   {
-    "id": "case-003",
-    "vulnerable": true,
-    "vulnerability_type": "checks_effects_interactions_violation",
-    "affected_function": "withdraw",
-    "explanation": "The balance is decremented after the external token.transfer call, allowing a reentrant caller to drain the vault before the state update is applied."
-  },
-  {
-    "id": "case-004",
-    "vulnerable": true,
-    "vulnerability_type": "missing_access_control",
-    "affected_function": "setTreasury",
-    "explanation": "setTreasury has no owner or access control check, allowing any caller to redirect fee collection to an arbitrary address."
-  },
-  {
     "id": "case-005",
     "vulnerable": true,
     "vulnerability_type": "share_price_manipulation",
@@ -53,7 +39,7 @@
     "vulnerable": true,
     "vulnerability_type": "ineffective_deadline",
     "affected_function": "swapWithPermit",
-    "explanation": "swapWithPermit uses block.timestamp >= deadline, which only allows execution after the deadline has passed — the opposite of the intended protection. The misleading error message 'not ready' makes the check appear intentional."
+    "explanation": "swapWithPermit uses block.timestamp >= deadline, which only allows execution after the deadline has passed \u2014 the opposite of the intended protection. The misleading error message 'not ready' makes the check appear intentional."
   },
   {
     "id": "case-009",
@@ -63,25 +49,11 @@
     "explanation": ""
   },
   {
-    "id": "case-010",
-    "vulnerable": true,
-    "vulnerability_type": "missing_input_validation",
-    "affected_function": "createMarket",
-    "explanation": "createMarket does not validate that discountBps <= 10000, allowing a market creator to set a discount of 10000 or more, making effectivePrice zero and enabling buyers to drain tokens for free."
-  },
-  {
     "id": "case-011",
     "vulnerable": true,
     "vulnerability_type": "incorrect_accounting",
     "affected_function": "vested",
     "explanation": "After the cliff, elapsed is calculated from grant start rather than from start + cliff. At the moment of cliff expiry a beneficiary can immediately claim all tokens that accrued during the cliff period, defeating the purpose of the cliff entirely."
-  },
-  {
-    "id": "case-012",
-    "vulnerable": true,
-    "vulnerability_type": "checks_effects_interactions_violation",
-    "affected_function": "withdrawTo",
-    "explanation": "withdrawTo makes an external call before zeroing deposits[msg.sender], and unlike deposit and cancel it has no nonReentrant guard. A malicious recipient contract can re-enter withdrawTo to drain the full vault balance."
   },
   {
     "id": "case-013",

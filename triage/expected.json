@@ -1,0 +1,62 @@
+[
+  {
+    "id": "case-001",
+    "severity": "CRITICAL",
+    "hot_spot": "liquidate",
+    "explanation": "liquidate does not verify the position is undercollateralized before seizing collateral. Any caller can liquidate a healthy borrower, steal their collateral at a 5% bonus, and leave them with reduced collateral but unchanged debt."
+  },
+  {
+    "id": "case-002",
+    "severity": "CRITICAL",
+    "hot_spot": "updateMerkleRoot",
+    "explanation": "updateMerkleRoot has no access control. Any caller can replace the trusted merkle root, allowing them to craft a valid proof for an arbitrary recipient and amount, minting wrapped tokens from thin air."
+  },
+  {
+    "id": "case-003",
+    "severity": "NONE",
+    "hot_spot": "",
+    "explanation": ""
+  },
+  {
+    "id": "case-004",
+    "severity": "NONE",
+    "hot_spot": "",
+    "explanation": ""
+  },
+  {
+    "id": "case-005",
+    "severity": "HIGH",
+    "hot_spot": "fillOrder",
+    "explanation": "ecrecover returns address(0) for malformed signatures. fillOrder does not reject address(0) as a signer, so an attacker can supply a garbage signature and fill any order whose seller is address(0), or craft a zero-address seller order to drain the ETH sent."
+  },
+  {
+    "id": "case-006",
+    "severity": "LOW",
+    "hot_spot": "split",
+    "explanation": "split uses transfer() which forwards only 2300 gas. If either partyA or partyB is a contract with a non-trivial fallback, the transfer reverts and neither party can receive their share, permanently locking funds."
+  },
+  {
+    "id": "case-007",
+    "severity": "INFO",
+    "hot_spot": "mint",
+    "explanation": "Owner can mint up to 90M additional tokens (90% of MAX_SUPPLY) with no timelock or governance constraint, representing significant centralization risk."
+  },
+  {
+    "id": "case-008",
+    "severity": "NONE",
+    "hot_spot": "",
+    "explanation": ""
+  },
+  {
+    "id": "case-009",
+    "severity": "NONE",
+    "hot_spot": "",
+    "explanation": ""
+  },
+  {
+    "id": "case-010",
+    "severity": "MEDIUM",
+    "hot_spot": "executeBuy",
+    "explanation": "If a user's configure() was never called, interval and amountPerBuy default to zero. executeBuy passes the readyAt and balance checks (0 >= 0) and calls the DEX with zero ETH, wasting gas and potentially causing unexpected DEX state. Additionally any keeper can grief users by front-running their buy execution."
+  }
+]
