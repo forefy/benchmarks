@@ -35,6 +35,24 @@ Competing skills are registered as targets on the benchmark detail page at the s
 
 Load `program.md` as your agent prompt in any agent environment with file and bash access (autoresearch, Claude Code, etc.). The agent fetches target skills from the registry (`GET /api/benchmarks/<id>/targets`), scores each against `corpus/public/` with `scorer.py`, and reports the ranked results.
 
-## Submitting a new benchmark
+
+## Contributors
+
+<table>
+<tr>
+    <td align="center">
+        <a href="https://github.com/forefy">
+            <img src="https://avatars.githubusercontent.com/u/166978930?v=4" width="100;" alt="forefy"/>
+            <br />
+            <sub><b>forefy</b></sub>
+        </a>
+    </td>
+</tr>
+</table>
+
+### Submitting a new benchmark
+
+Your research knowledge is the only prerequisite to contribute, whether its a methodology, specific knowledge on a protocol or language or even corrections - everything's highly welcome! help secure and improve the community!
 
 See [CONTRIBUTING.md](CONTRIBUTING.md).
+
