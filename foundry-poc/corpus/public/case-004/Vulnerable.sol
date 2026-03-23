@@ -1,12 +1,47 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+interface IEpochManager {
+    function currentEpoch() external view returns (uint256);
+    function epochRewardRate(uint256 epoch) external view returns (uint256);
+}
+
+interface IRewardToken {
+    function mint(address to, uint256 amount) external;
+}
+
 contract RewardDistributor {
     address public admin;
     mapping(bytes32 => bool) public claimed;
+    IEpochManager public epochManager;
+    IRewardToken public rewardToken;
+    uint256 public totalDistributed;
+
+    event RewardClaimed(address indexed recipient, uint256 amount);
+    event AdminChanged(address indexed previousAdmin, address indexed newAdmin);
+    event EpochManagerSet(address indexed epochManager);
+
+    modifier onlyAdmin() {
+        require(msg.sender == admin, "not admin");
+        _;
+    }
 
     constructor() {
         admin = msg.sender;
+    }
+
+    function setAdmin(address newAdmin) external onlyAdmin {
+        emit AdminChanged(admin, newAdmin);
+        admin = newAdmin;
+    }
+
+    function setEpochManager(address _epochManager) external onlyAdmin {
+        epochManager = IEpochManager(_epochManager);
+        emit EpochManagerSet(_epochManager);
+    }
+
+    function setRewardToken(address _rewardToken) external onlyAdmin {
+        rewardToken = IRewardToken(_rewardToken);
     }
 
     function claim(address recipient, uint256 amount, bytes calldata sig) external {
@@ -16,6 +51,14 @@ contract RewardDistributor {
         require(signer == admin, "bad sig");
         (bool ok,) = recipient.call{value: amount}("");
         require(ok, "transfer failed");
+        totalDistributed += amount;
+        if (address(rewardToken) != address(0)) {
+            uint256 bonus = amount / 10;
+            if (bonus > 0) {
+                rewardToken.mint(recipient, bonus);
+            }
+        }
+        emit RewardClaimed(recipient, amount);
     }
 
     function _recover(bytes32 hash, bytes calldata sig) internal pure returns (address) {
