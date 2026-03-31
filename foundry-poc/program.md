@@ -1,5 +1,5 @@
 ---
-name: Foundry PoC Writer
+name: Foundry PoC Generation
 description: Evaluates a skill's ability to write working Foundry proof-of-concept exploits that demonstrate fund loss from vulnerable Solidity contracts. The PoC must compile and pass forge test.
 ---
 
