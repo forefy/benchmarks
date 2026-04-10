@@ -1,0 +1,223 @@
+[
+  {
+    "id": "case-001",
+    "findings": [
+      {
+        "vulnerable": true,
+        "vulnerability_type": "price_manipulation",
+        "affected_function": "get_cost_amount",
+        "severity": "HIGH",
+        "explanation": "Domain pricing relies on direct spot price from the Dex module which is directly related to pool reserves. This can be manipulated with a flash loan or a large amount deposit, allowing attackers to buy domains at lower prices or cause users to overpay."
+      },
+      {
+        "vulnerable": true,
+        "vulnerability_type": "design_flaw",
+        "affected_function": "register_domain",
+        "severity": "HIGH",
+        "explanation": "NFT Token ID contains a forbidden colon character by design which prevents any domain from being issued at all, as the underlying nft.move module rejects token IDs containing colons."
+      },
+      {
+        "vulnerable": true,
+        "vulnerability_type": "missing_validation",
+        "affected_function": "extend_expiration",
+        "severity": "HIGH",
+        "explanation": "The validation for duration is incorrect, allowing users to bypass MAX_EXPIRATION by calculating new_expiration_date - expiration_date instead of new_expiration_date - timestamp, effectively allowing expiration to be doubled to MAX_EXPIRATION * 2."
+      },
+      {
+        "vulnerable": true,
+        "vulnerability_type": "logic_error",
+        "affected_function": "extend_expiration",
+        "severity": "HIGH",
+        "explanation": "Extending a domain's expiration even after the grace period impacts domain buyers, as the previous owner can extend expiration and transfer the domain to themselves using get_address_from_name, bypassing ownership transfer."
+      },
+      {
+        "vulnerable": true,
+        "vulnerability_type": "stale_data",
+        "affected_function": "register_domain",
+        "severity": "MEDIUM",
+        "explanation": "Address mappings (name_to_addr and addr_to_name) are not cleaned up after domain expiry, causing loss of funds when users transfer tokens to expired domains that return previous owner addresses."
+      },
+      {
+        "vulnerable": true,
+        "vulnerability_type": "incorrect_logic",
+        "affected_function": "get_cost_amount",
+        "severity": "MEDIUM",
+        "explanation": "The function sets price_per_year to 0 for domain names with length >= 7 due to incorrect else branch logic, enabling unlimited free domain registrations and potential griefing attacks."
+      },
+      {
+        "vulnerable": true,
+        "vulnerability_type": "incorrect_logic",
+        "affected_function": "create_proposal",
+        "severity": "MEDIUM",
+        "explanation": "The proposal expiration logic is incorrect, potentially causing proposals to expire prematurely or remain active longer than intended."
+      },
+      {
+        "vulnerable": true,
+        "vulnerability_type": "incorrect_type",
+        "affected_function": "query_currency_pairs",
+        "severity": "MEDIUM",
+        "explanation": "Incorrect request type in oracle currency pairs query whitelist breaks price discovery, causing incorrect oracle data to be used for domain pricing."
+      }
+    ]
+  },
+  {
+    "id": "case-002",
+    "findings": [
+      {
+        "vulnerable": true,
+        "vulnerability_type": "accounting_error",
+        "affected_function": "process_lp_unstake",
+        "severity": "HIGH",
+        "explanation": "LP unstaking only burns the shares but leaves the underlying tokens in the system, which distorts the shares-to-tokens ratio and leads to incorrect amounts being calculated during staking and unstaking."
+      },
+      {
+        "vulnerable": true,
+        "vulnerability_type": "denial_of_service",
+        "affected_function": "reentry_check",
+        "severity": "MEDIUM",
+        "explanation": "Reentrancy check in lock_staking::reentry_check causes concurrent INIT deposit failures (DoS) by enforcing a strict one-delegation-per-block rule for a given StakingAccount."
+      },
+      {
+        "vulnerable": true,
+        "vulnerability_type": "incorrect_calculation",
+        "affected_function": "initiate_unstake",
+        "severity": "MEDIUM",
+        "explanation": "Unstaking calculates user share at request time, ignoring slashing, leading to DoS and unfair distribution when slashing occurs between unstake request and completion."
+      },
+      {
+        "vulnerable": true,
+        "vulnerability_type": "race_condition",
+        "affected_function": "initiate_unstake",
+        "severity": "MEDIUM",
+        "explanation": "Attacker can desynchronize supply snapshot during same-block unstake by unstaking at the end of a block before the reward distribution occurs, reducing everyone's rewards."
+      },
+      {
+        "vulnerable": true,
+        "vulnerability_type": "arithmetic_underflow",
+        "affected_function": "unlock",
+        "severity": "MEDIUM",
+        "explanation": "Unstaking from LP pools will cause underflow and lock user funds when the last pool is empty or has insufficient funds, trying to withdraw too much from one pool when funds are located in other pools."
+      },
+      {
+        "vulnerable": true,
+        "vulnerability_type": "denial_of_service",
+        "affected_function": "process_lp_unstake",
+        "severity": "MEDIUM",
+        "explanation": "Last holder can't exit, zero-supply unstake reverts when the last LP token holder attempts to unstake, causing a denial of service."
+      },
+      {
+        "vulnerable": true,
+        "vulnerability_type": "accounting_error",
+        "affected_function": "redelegation",
+        "severity": "MEDIUM",
+        "explanation": "LP redelegation uses inaccurate internal tracker amount, leading to potential failures or orphaned funds when the tracker desynchronizes from actual staked amounts."
+      },
+      {
+        "vulnerable": true,
+        "vulnerability_type": "accounting_error",
+        "affected_function": "deposit_init_for_xinit",
+        "severity": "MEDIUM",
+        "explanation": "Desynchronization of Cabal's internal accounting with actual staked INIT amounts leads to over-minting of sxINIT tokens when the tracker diverges from actual balances."
+      }
+    ]
+  },
+  {
+    "id": "case-003",
+    "findings": [
+      {
+        "vulnerable": true,
+        "vulnerability_type": "missing_type_validation",
+        "affected_function": "repay_flash_swap",
+        "severity": "HIGH",
+        "explanation": "repay_flash_swap accepts arbitrary token types without validating that the asset's metadata type equals the pool's configured tokens, enabling theft of pool assets by repaying flash loans with worthless tokens."
+      },
+      {
+        "vulnerable": true,
+        "vulnerability_type": "missing_validation",
+        "affected_function": "collect_rewarder",
+        "severity": "HIGH",
+        "explanation": "Unchecked reward asset during reward claim allows withdrawing the wrong token from pool reserves by trusting user-supplied asset_addr instead of enforcing the configured rewarder asset."
+      },
+      {
+        "vulnerable": true,
+        "vulnerability_type": "missing_asset_validation",
+        "affected_function": "repay_add_liquidity",
+        "severity": "HIGH",
+        "explanation": "Missing asset-type validation in repay_add_liquidity allows wrong token repayment, enabling attackers to repay liquidity flash loans with arbitrary token types."
+      },
+      {
+        "vulnerable": true,
+        "vulnerability_type": "access_control",
+        "affected_function": "revoke_role",
+        "severity": "MEDIUM",
+        "explanation": "Incorrect role revocation logic may grant unauthorized roles when revoking a role that doesn't exist or has already been revoked, potentially granting unintended permissions."
+      },
+      {
+        "vulnerable": true,
+        "vulnerability_type": "incorrect_emission_logic",
+        "affected_function": "update_emission",
+        "severity": "HIGH",
+        "explanation": "Rewarder emissions on pool assets drain LP liquidity by distributing reward tokens that are actually pool assets, depleting the liquidity pool over time."
+      }
+    ]
+  },
+  {
+    "id": "case-004",
+    "findings": [
+      {
+        "vulnerable": true,
+        "vulnerability_type": "arithmetic_error",
+        "affected_function": "split",
+        "severity": "HIGH",
+        "explanation": "Permanent value loss when splitting a veNFT due to integer division flooring each child amount, causing silent deflation as the sum of child amounts is less than the original parent amount."
+      },
+      {
+        "vulnerable": true,
+        "vulnerability_type": "incorrect_balance_handling",
+        "affected_function": "emergency_withdraw",
+        "severity": "HIGH",
+        "explanation": "Emergency mode burns full balance when withdrawing a single NFT by zeroing the entire recorded balance while only removing one NFT, causing remaining NFTs to become permanently locked."
+      },
+      {
+        "vulnerable": true,
+        "vulnerability_type": "freeze_bypass",
+        "affected_function": "fungible_store_migration",
+        "severity": "MEDIUM",
+        "explanation": "Freeze bypass via fungible-store migration allows users to circumvent token freeze protections by migrating to a new fungible store that doesn't respect the freeze status."
+      },
+      {
+        "vulnerable": true,
+        "vulnerability_type": "precision_loss",
+        "affected_function": "reward_increment",
+        "severity": "MEDIUM",
+        "explanation": "Insufficient precision in reward_increment calculation allows reward exploitation due to rounding errors that can be gamed to claim more rewards than intended."
+      },
+      {
+        "vulnerable": true,
+        "vulnerability_type": "arithmetic_overflow",
+        "affected_function": "reward_per_token_internal",
+        "severity": "HIGH",
+        "explanation": "reward_per_token_internal() arithmetic overflow when calculating rewards can cause incorrect reward distribution or transaction failures."
+      }
+    ]
+  },
+  {
+    "id": "case-005",
+    "findings": [
+      {
+        "vulnerable": true,
+        "vulnerability_type": "missing_validation",
+        "affected_function": "set_msglib_ptb_builder",
+        "severity": "LOW",
+        "explanation": "OApp can set DEFAULT_BUILDER without a system default, leading to aborts (DoS) in PTB construction when no default builder exists for the requested message library."
+      },
+      {
+        "vulnerable": false,
+        "vulnerability_type": "documentation",
+        "affected_function": "N/A",
+        "severity": "LOW",
+        "explanation": "Doc fix - clearing happens before call creation, not after execution. This is a documentation issue only."
+      }
+    ]
+  }
+]
