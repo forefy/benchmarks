@@ -210,14 +210,15 @@
         "affected_function": "set_msglib_ptb_builder",
         "severity": "LOW",
         "explanation": "OApp can set DEFAULT_BUILDER without a system default, leading to aborts (DoS) in PTB construction when no default builder exists for the requested message library."
-      },
-      {
-        "vulnerable": false,
-        "vulnerability_type": "documentation",
-        "affected_function": "N/A",
-        "severity": "LOW",
-        "explanation": "Doc fix - clearing happens before call creation, not after execution. This is a documentation issue only."
       }
     ]
+  },
+  {
+    "id": "case-006",
+    "findings": []
+  },
+  {
+    "id": "case-007",
+    "findings": []
   }
 ]
