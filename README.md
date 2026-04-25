@@ -47,6 +47,20 @@ Load `program.md` as your agent prompt in any agent environment with file and ba
             <sub><b>forefy</b></sub>
         </a>
     </td>
+    <td align="center">
+        <a href="https://github.com/taylorhaun">
+            <img src="https://avatars.githubusercontent.com/u/19726118?v=4" width="100;" alt="forefy"/>
+            <br />
+            <sub><b>taylorhaun</b></sub>
+        </a>
+    </td>
+    <td align="center">
+        <a href="https://github.com/chrisyy2003">
+            <img src="https://avatars.githubusercontent.com/u/63803385?v=4" width="100;" alt="forefy"/>
+            <br />
+            <sub><b>chrisyy2003</b></sub>
+        </a>
+    </td>
 </tr>
 </table>
 
