@@ -1,0 +1,158 @@
+[
+  {
+    "id": "case-001",
+    "findings": [
+      {
+        "vulnerable": true,
+        "vulnerability_type": "missing_access_control",
+        "affected_function": "set_fee_bps",
+        "severity": "HIGH",
+        "explanation": "set_fee_bps does not require the caller to be the config authority, so any signer can set arbitrary fees and redirect protocol economics."
+      }
+    ]
+  },
+  {
+    "id": "case-002",
+    "findings": [
+      {
+        "vulnerable": true,
+        "vulnerability_type": "missing_signer_check",
+        "affected_function": "delegate_withdraw",
+        "severity": "CRITICAL",
+        "explanation": "delegate_withdraw accepts the owner as an unchecked AccountInfo and never requires owner.is_signer, allowing anyone to withdraw from another user's vault."
+      }
+    ]
+  },
+  {
+    "id": "case-003",
+    "findings": [
+      {
+        "vulnerable": true,
+        "vulnerability_type": "missing_pda_validation",
+        "affected_function": "withdraw",
+        "severity": "CRITICAL",
+        "explanation": "withdraw trusts a caller-supplied vault_authority without enforcing the expected PDA seeds, allowing an attacker-controlled authority to sign token transfers from attacker-owned token accounts while crediting victim accounting."
+      }
+    ]
+  },
+  {
+    "id": "case-004",
+    "findings": [
+      {
+        "vulnerable": true,
+        "vulnerability_type": "arbitrary_cpi",
+        "affected_function": "pay",
+        "severity": "HIGH",
+        "explanation": "pay invokes a caller-supplied token_program instead of Program<Token>, allowing malicious CPI code to run with the provided writable accounts."
+      }
+    ]
+  },
+  {
+    "id": "case-005",
+    "findings": [
+      {
+        "vulnerable": true,
+        "vulnerability_type": "missing_token_account_validation",
+        "affected_function": "deposit",
+        "severity": "HIGH",
+        "explanation": "deposit never checks the user_token and vault_token mints or authorities, so users can deposit worthless tokens and receive credit as if they deposited the protocol mint."
+      }
+    ]
+  },
+  {
+    "id": "case-006",
+    "findings": [
+      {
+        "vulnerable": true,
+        "vulnerability_type": "arithmetic_overflow",
+        "affected_function": "accrue_rewards",
+        "severity": "MEDIUM",
+        "explanation": "accrue_rewards uses wrapping_add and unchecked multiplication, letting large elapsed time or reward rate wrap rewards to an incorrect value."
+      }
+    ]
+  },
+  {
+    "id": "case-007",
+    "findings": [
+      {
+        "vulnerable": true,
+        "vulnerability_type": "reinitialization",
+        "affected_function": "initialize_pool",
+        "severity": "HIGH",
+        "explanation": "initialize_pool uses init_if_needed and overwrites authority and mint fields without an initialized guard, allowing an existing pool to be reconfigured by another signer."
+      }
+    ]
+  },
+  {
+    "id": "case-008",
+    "findings": [
+      {
+        "vulnerable": true,
+        "vulnerability_type": "insecure_account_close",
+        "affected_function": "close_position",
+        "severity": "MEDIUM",
+        "explanation": "close_position sends the closed account lamports to an arbitrary receiver instead of the position owner, allowing anyone who controls close conditions to redirect rent refunds."
+      }
+    ]
+  },
+  {
+    "id": "case-009",
+    "findings": [
+      {
+        "vulnerable": true,
+        "vulnerability_type": "missing_remaining_account_validation",
+        "affected_function": "sweep_remaining_rewards",
+        "severity": "HIGH",
+        "explanation": "sweep_remaining_rewards iterates over remaining_accounts and mutates any writable account without validating ownership, type, or relationship to the reward pool."
+      }
+    ]
+  },
+  {
+    "id": "case-010",
+    "findings": [
+      {
+        "vulnerable": true,
+        "vulnerability_type": "stale_oracle_price",
+        "affected_function": "borrow",
+        "severity": "HIGH",
+        "explanation": "borrow reads the oracle price without checking last_update_slot freshness, enabling loans against stale collateral prices."
+      }
+    ]
+  },
+  {
+    "id": "case-011",
+    "findings": [
+      {
+        "vulnerable": true,
+        "vulnerability_type": "missing_recipient_validation",
+        "affected_function": "claim_refund",
+        "severity": "HIGH",
+        "explanation": "claim_refund transfers lamports to an arbitrary recipient instead of the order buyer, allowing the signer to redirect refunds away from the rightful owner."
+      }
+    ]
+  },
+  {
+    "id": "case-012",
+    "findings": [
+      {
+        "vulnerable": true,
+        "vulnerability_type": "pda_seed_collision",
+        "affected_function": "create_profile",
+        "severity": "MEDIUM",
+        "explanation": "create_profile derives a PDA from two variable-length byte strings without separators or length prefixes, so distinct username/domain pairs can collide to the same seed bytes."
+      }
+    ]
+  },
+  {
+    "id": "case-013",
+    "findings": []
+  },
+  {
+    "id": "case-014",
+    "findings": []
+  },
+  {
+    "id": "case-015",
+    "findings": []
+  }
+]

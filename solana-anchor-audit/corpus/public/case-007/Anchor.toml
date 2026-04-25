@@ -1,0 +1,13 @@
+[features]
+seeds = false
+skip-lint = false
+
+[programs.localnet]
+case_007 = "5TZimxwZJDLGrvaAGeFVChyXHkpHR4VFcwfytYV2Tt9u"
+
+[provider]
+cluster = "Localnet"
+wallet = "~/.config/solana/id.json"
+
+[scripts]
+test = "cargo test"
