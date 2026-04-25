@@ -52,6 +52,9 @@ def severity_score(expected_sev: str, output_sev: str) -> float:
 
 
 def score_finding_pair(output_f: dict, expected_f: dict) -> float:
+    if not output_f.get("vulnerable", True):
+        return 0.0
+
     score = 0.0
 
     exp_type = normalize(expected_f.get("vulnerability_type", ""))
